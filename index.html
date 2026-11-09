@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="id"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Jadwal Danus</title>
+<meta name="theme-color" content="#14101f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Danus">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#14101f;--sf:#1f1a2e;--sf2:#2a2340;--ln:#3a3254;--tx:#f4efe6;--mu:#a69fbc;--am:#ffb347;--ok:#3ddc97;--bad:#ff5d73;--r:16px}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.5 'Instrument Sans',system-ui,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);-webkit-tap-highlight-color:transparent}
+.wrap{max-width:1000px;margin:0 auto;padding:16px}
+h1,h2,h3,.clock{font-family:'Bricolage Grotesque',system-ui,sans-serif}
+header{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
+button,select,input{font:inherit;color:inherit}
+.btn{background:var(--sf);border:1px solid var(--ln);border-radius:999px;padding:8px 14px;cursor:pointer;min-height:40px}
+.btn:hover{border-color:var(--am)}
+.btn.pri{background:var(--am);color:#2a1a00;border-color:var(--am);font-weight:600}
+.btn.sm{padding:2px 10px;min-height:32px;font-size:14px}
+.btn.danger{color:var(--bad)}
+:focus-visible{outline:3px solid var(--am);outline-offset:2px}
+select.btn{padding-right:8px;max-width:50vw}
+#tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.hero{display:grid;gap:12px;margin:16px 0}
+@media(min-width:760px){.hero{grid-template-columns:1fr 1.3fr}}
+.time,.status{border-radius:var(--r);padding:20px;background:var(--sf);border:2px solid var(--ln)}
+.clock{font-size:clamp(52px,13vw,88px);font-weight:800;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+#date{color:var(--mu);margin-top:6px}
+.status.live{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--sf));box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 18%,transparent)}
+.status.next{border-color:var(--am)}
+.lbl{display:inline-flex;align-items:center;gap:8px;color:var(--mu);font-size:14px}
+.live .lbl{color:var(--ok);font-weight:600}.next .lbl{color:var(--am)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--ok);animation:p 1.4s infinite}
+@keyframes p{50%{opacity:.25}}
+.status h2{font-size:clamp(24px,5vw,34px);margin:8px 0 2px;letter-spacing:-.02em}
+.cd{font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:600;font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.tab{flex:0 0 auto;background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:8px 16px;cursor:pointer;min-height:44px}
+.tab.today{box-shadow:inset 0 -3px var(--am)}
+.tab[aria-selected=true]{background:var(--am);color:#2a1a00;border-color:var(--am);font-weight:600}
+#list{display:grid;gap:10px;margin-top:10px}
+@media(min-width:760px){#list{grid-template-columns:1fr 1fr}}
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:var(--r);padding:16px}
+.card.done{opacity:.5}
+.card.live{border:2px solid var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--sf));box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 18%,transparent)}
+.card.next{border-color:var(--am)}
+.card h3{font-size:20px}
+.rng{font-variant-numeric:tabular-nums;color:var(--mu)}
+.badge{float:right;font-size:13px;border-radius:999px;padding:2px 10px;background:var(--ln)}
+.live .badge{background:var(--ok);color:#06281a;font-weight:600}.next .badge{background:var(--am);color:#2a1a00}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.chip{background:var(--sf2);border-radius:999px;padding:2px 12px;font-size:15px}
+.chip.me{background:var(--am);color:#2a1a00;font-weight:600}
+.note{color:var(--mu);font-size:14px}
+.acts{display:flex;gap:8px;margin-top:10px}
+.empty{grid-column:1/-1;text-align:center;color:var(--mu);padding:32px 16px;border:1px dashed var(--ln);border-radius:var(--r)}
+.brk{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;color:var(--mu);font-size:14px}
+.brk span{border:1px dashed var(--ln);border-radius:999px;padding:2px 12px}
+#admin{margin:12px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--sf2);border-radius:var(--r);padding:10px 14px}
+footer{margin-top:24px;color:var(--mu);font-size:14px}
+dialog{background:var(--sf);color:var(--tx);border:1px solid var(--ln);border-radius:var(--r);padding:20px;width:min(440px,92vw);margin:auto}
+dialog::backdrop{background:#000b}
+dialog label{display:block;margin-top:12px;font-size:14px;color:var(--mu)}
+dialog input,dialog select{width:100%;background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:10px;min-height:44px;margin-top:4px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.fa{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.err{color:var(--bad);margin-top:10px;font-size:14px;min-height:20px}
+#al{border:3px solid var(--bad);text-align:center;animation:glow 1s infinite}
+@keyframes glow{50%{box-shadow:0 0 40px var(--bad)}}
+#al h2{font-size:30px;margin:8px 0}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body>
+<div class="wrap">
+<header>
+  <h1>Jadwal Danus</h1>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <select id="me" class="btn" aria-label="Pilih nama saya"></select>
+    <button id="op" class="btn pri">Operator</button>
+  </div>
+</header>
+<div id="tools">
+  <button id="bNotif" class="btn sm">Aktifkan notifikasi</button>
+  <button id="bWake" class="btn sm">Layar tetap menyala</button>
+  <button id="bInstall" class="btn sm" hidden>Pasang aplikasi</button>
+</div>
+<section class="hero">
+  <div class="time"><div class="clock" id="clock">--:--:--</div><div id="date"></div></div>
+  <div class="status" id="hero"></div>
+</section>
+<div id="admin" hidden>
+  <strong>Mode operator</strong>
+  <button id="bAdd" class="btn sm pri">Tambah shift</button>
+  <button id="bSeed" class="btn sm" hidden>Isi jadwal awal</button>
+  <button id="bOut" class="btn sm">Keluar</button>
+</div>
+<nav class="tabs" id="tabs" role="tablist" aria-label="Hari"></nav>
+<main id="list"></main>
+<footer><div id="stat"></div><div id="ios" hidden>Di iPhone: buka lewat Safari, tekan Bagikan, lalu pilih Tambah ke Layar Utama.</div></footer>
+</div>
+
+<dialog id="dPin"><form method="dialog" id="fPin"><h3>Login operator</h3>
+<label>PIN<input id="pin" type="password" inputmode="numeric" autocomplete="off" required></label>
+<div class="err" id="ePin"></div>
+<div class="fa"><button type="button" class="btn" data-close>Batal</button><button class="btn pri">Masuk</button></div></form></dialog>
+
+<dialog id="dForm"><form method="dialog" id="fForm"><h3 id="tForm">Shift</h3>
+<label>Hari<select id="fHari"></select></label>
+<label>Nama shift<input id="fNama" required maxlength="40"></label>
+<div class="row"><label>Mulai<input id="fMulai" type="time" required></label><label>Selesai<input id="fSelesai" type="time" required></label></div>
+<label>Petugas (pisahkan dengan koma)<input id="fPet" required list="dl"></label><datalist id="dl"></datalist>
+<label>Catatan<input id="fCat" maxlength="120"></label>
+<div class="err" id="eForm"></div>
+<div class="fa"><button type="button" class="btn" data-close>Batal</button><button class="btn pri">Simpan shift</button></div></form></dialog>
+
+<dialog id="al"><div class="lbl" style="justify-content:center">15 menit lagi</div><h2 id="alT"></h2><p id="alP"></p><div class="fa" style="justify-content:center"><button class="btn pri" id="alOk">Siap</button></div></dialog>
+
+<script>
+const CONFIG={SUPABASE_URL:'https://oavgprioehjhlyatoxvo.supabase.co',SUPABASE_KEY:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hdmdwcmlvZWhqaGx5YXRveHZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyNDM1NzksImV4cCI6MjEwOTgxOTU3OX0.X1IRtZEOZGil_7i9YPduhR8kIADjGmCrLO6udsXZpVM',LOCAL_PIN:'2026',ALERT_MIN:15};
+const HARI=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],DAYS=[1,2,3,4,5,6,0];
+const BREAKS=[['Jeda Dzuhur','11:45','12:30'],['Jeda Ashar','15:00','15:30']];
+const SEED=[
+[1,'Shift Siang','10:00','11:45','Asep, Gita, Amanda','Gita mulai 10.20, Amanda mulai 10.35'],
+[1,'Shift Sore','15:30','17:00','Gita, Dapa, Amanda','Amanda mulai 16.00'],
+[2,'Shift Siang','10:00','11:45','Erina, Amanda, Gita, Pina','Gita dan Pina sampai 10.40'],
+[2,'Shift Sore','15:30','17:00','Asep, Erina, Gita, Amanda','Amanda mulai 16.00'],
+[3,'Shift Siang','10:00','11:45','Dapa, Asep, Pina','Asep dan Pina sampai 10.40'],
+[3,'Shift Sore','15:30','17:00','Dapa, Erina, Gita, Amanda, Asep','Asep mulai 16.00'],
+[4,'Shift Siang','10:00','11:45','Gita, Pina, Asep','Pina sampai 11.20, Asep mulai 10.35'],
+[4,'Shift Sore','15:30','17:00','Erina, Dapa, Amanda, Gita, Asep','Asep mulai 16.20'],
+[5,'Shift Siang','10:00','11:45','Asep, Dapa, Pina, Amanda, Erina','Erina mulai 10.35'],
+[5,'Shift Sore','15:30','17:00','Asep, Erina, Dapa, Pina, Gita','Gita mulai 16.00. Hari flash sale']];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hm=t=>String(t).slice(0,5),mins=t=>{const[a,b]=hm(t).split(':');return +a*60+ +b};
+const pad=n=>String(n).padStart(2,'0');
+const get=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}};
+const set=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const uid=()=>'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const names=s=>s.petugas.split(',').map(x=>x.trim()).filter(Boolean);
+
+let db=null,mode='local',shifts=get('ds_cache',[]),pin=null,me=get('ds_me',''),selDay=new Date().getDay(),online=true,lastMin=-1,editing=null;
+try{pin=sessionStorage.getItem('ds_pin')}catch{}
+if(CONFIG.SUPABASE_URL&&CONFIG.SUPABASE_KEY&&window.supabase){db=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY);mode='cloud'}
+
+const api={
+ async load(){
+  if(mode==='cloud'){const{data,error}=await db.from('jadwal_danus').select('*').order('jam_mulai');if(error)throw error;return data}
+  let l=get('ds_local',null);if(!l){l=SEED.map(a=>({id:uid(),hari:a[0],shift_nama:a[1],jam_mulai:a[2],jam_selesai:a[3],petugas:a[4],catatan:a[5]}));set('ds_local',l)}return l},
+ async check(p){
+  if(mode==='cloud'){const{data,error}=await db.rpc('cek_pin',{p_pin:p});if(error)throw error;return data===true}
+  return p===CONFIG.LOCAL_PIN},
+ async save(r){
+  if(mode==='cloud'){const{error}=await db.rpc('simpan_shift',{p_pin:pin,p_id:r.id||null,p_hari:r.hari,p_nama:r.shift_nama,p_mulai:r.jam_mulai,p_selesai:r.jam_selesai,p_petugas:r.petugas,p_catatan:r.catatan});if(error)throw error;return}
+  const l=get('ds_local',[]);if(r.id){const i=l.findIndex(x=>x.id===r.id);l[i]={...l[i],...r}}else l.push({...r,id:uid()});set('ds_local',l)},
+ async del(id){
+  if(mode==='cloud'){const{error}=await db.rpc('hapus_shift',{p_pin:pin,p_id:id});if(error)throw error;return}
+  set('ds_local',get('ds_local',[]).filter(x=>x.id!==id))}
+};
+
+async function refresh(){
+ try{shifts=await api.load();set('ds_cache',shifts);online=true}catch(e){console.error(e);online=false}
+ renderAll()}
+
+function todayList(){const d=new Date().getDay();return shifts.filter(s=>s.hari===d).sort((a,b)=>mins(a.jam_mulai)-mins(b.jam_mulai))}
+const fmtCd=s=>{s=Math.max(0,s);return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)};
+const mine=s=>!me||names(s).includes(me);
+
+function tick(){
+ const d=new Date(),sec=d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
+ $('#clock').textContent=pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+ $('#date').textContent=d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ const t=todayList(),st=s=>mins(s.jam_mulai)*60,en=s=>mins(s.jam_selesai)*60;
+ const live=t.find(s=>sec>=st(s)&&sec<en(s)),next=t.find(s=>st(s)>sec),brk=BREAKS.find(b=>sec>=mins(b[1])*60&&sec<mins(b[2])*60);
+ const h=$('#hero');
+ if(live){h.className='status live';h.innerHTML=`<span class="lbl"><i class="dot"></i>Sedang berlangsung</span><h2>${esc(live.shift_nama)}</h2><div>${esc(live.petugas)}</div><div class="note">Selesai dalam</div><div class="cd">${fmtCd(en(live)-sec)}</div>`}
+ else if(brk){h.className='status';h.innerHTML=`<span class="lbl">Istirahat</span><h2>${brk[0]}</h2><div class="note">Lanjut jam ${brk[2]}</div>`+(next?`<div class="note" style="margin-top:8px">Berikutnya: ${esc(next.shift_nama)} pukul ${hm(next.jam_mulai)}</div>`:'')}
+ else if(next){h.className='status next';h.innerHTML=`<span class="lbl">Berikutnya pukul ${hm(next.jam_mulai)}</span><h2>${esc(next.shift_nama)}</h2><div>${esc(next.petugas)}</div><div class="note">Mulai dalam</div><div class="cd">${fmtCd(st(next)-sec)}</div>`}
+ else{h.className='status';h.innerHTML=`<span class="lbl">Hari ini</span><h2>${t.length?'Semua shift selesai':'Tidak ada jadwal'}</h2><div class="note">${t.length?'Terima kasih, tim.':'Operator bisa menambah shift lewat tombol Operator.'}</div>`}
+ const key=d.toDateString();let done=get('ds_alerted',[]);
+ for(const s of t){const diff=st(s)-sec;
+  if(diff>0&&diff<=CONFIG.ALERT_MIN*60&&mine(s)&&!done.includes(key+s.id)){done.push(key+s.id);set('ds_alerted',done.slice(-60));fire(s)}}
+ if(Math.floor(sec/60)!==lastMin){lastMin=Math.floor(sec/60);renderList()}
+}
+
+function fire(s){
+ $('#alT').textContent=s.shift_nama+' mulai '+hm(s.jam_mulai);$('#alP').textContent='Petugas: '+s.petugas;
+ const a=$('#al');if(!a.open)a.showModal();beep();try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch{}
+ try{if(Notification.permission==='granted'){const o={body:'Petugas: '+s.petugas,tag:s.id};
+  navigator.serviceWorker&&navigator.serviceWorker.ready?navigator.serviceWorker.ready.then(r=>r.showNotification('15 menit lagi: '+s.shift_nama,o)):new Notification('15 menit lagi: '+s.shift_nama,o)}}catch{}}
+let ac;function beep(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();[0,.25,.5].forEach(t=>{const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime+t;o.frequency.value=880;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.25,n);g.gain.exponentialRampToValueAtTime(.001,n+.2);o.start(n);o.stop(n+.22)})}catch{}}
+
+function renderTabs(){
+ const td=new Date().getDay();
+ $('#tabs').innerHTML=DAYS.map(d=>`<button class="tab${d===td?' today':''}" role="tab" aria-selected="${d===selDay}" data-d="${d}">${HARI[d]}</button>`).join('')}
+
+function renderList(){
+ const now=new Date(),sec=now.getHours()*3600+now.getMinutes()*60,isToday=selDay===now.getDay();
+ const l=shifts.filter(s=>s.hari===selDay).sort((a,b)=>mins(a.jam_mulai)-mins(b.jam_mulai));
+ const nx=isToday?l.find(s=>mins(s.jam_mulai)*60>sec):null;
+ let h=l.map(s=>{
+  let c='',b='';
+  if(isToday){if(sec>=mins(s.jam_mulai)*60&&sec<mins(s.jam_selesai)*60){c='live';b='Sedang berlangsung'}else if(sec>=mins(s.jam_selesai)*60){c='done';b='Selesai'}else if(s===nx){c='next';b='Berikutnya'}}
+  return `<article class="card ${c}">${b?`<span class="badge">${b}</span>`:''}<h3>${esc(s.shift_nama)}</h3><div class="rng">${hm(s.jam_mulai)} sampai ${hm(s.jam_selesai)}</div>
+  <div class="chips">${names(s).map(n=>`<span class="chip${n===me?' me':''}">${esc(n)}</span>`).join('')}</div>
+  ${s.catatan?`<div class="note">${esc(s.catatan)}</div>`:''}
+  ${pin?`<div class="acts"><button class="btn sm" data-act="edit" data-id="${s.id}">Edit</button><button class="btn sm danger" data-act="del" data-id="${s.id}">Hapus</button></div>`:''}</article>`}).join('');
+ if(!l.length)h=`<div class="empty">Belum ada shift hari ${HARI[selDay]}.${pin?' Tekan Tambah shift untuk mengisi.':''}</div>`;
+ else h+=`<div class="brk">${BREAKS.map(b=>`<span>${b[0]} ${b[1]} sampai ${b[2]}</span>`).join('')}</div>`;
+ $('#list').innerHTML=h}
+
+function renderMe(){
+ const p=[...new Set(shifts.flatMap(names))].sort();
+ $('#me').innerHTML='<option value="">Semua petugas</option>'+p.map(n=>`<option${n===me?' selected':''}>${esc(n)}</option>`).join('');
+ $('#dl').innerHTML=p.map(n=>`<option value="${esc(n)}">`).join('')}
+
+function renderStat(){
+ $('#stat').textContent=mode==='local'?'Mode lokal: data hanya di perangkat ini. Isi CONFIG Supabase di index.html untuk sinkron antar HP.':online?'Tersambung ke Supabase, perubahan tampil langsung di semua perangkat.':'Offline: menampilkan jadwal tersimpan terakhir.'}
+
+function renderAdmin(){$('#admin').hidden=!pin;$('#op').textContent=pin?'Operator aktif':'Operator';$('#bSeed').hidden=!(pin&&!shifts.length)}
+function renderAll(){renderMe();renderTabs();renderList();renderStat();renderAdmin();lastMin=-1;tick()}
+
+// events
+$('#tabs').onclick=e=>{const b=e.target.closest('.tab');if(b){selDay=+b.dataset.d;renderTabs();renderList()}};
+$('#me').onchange=e=>{me=e.target.value;set('ds_me',me);renderList()};
+document.addEventListener('click',()=>{try{ac=ac||new(window.AudioContext||window.webkitAudioContext)()}catch{}},{once:true});
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
+$('#alOk').onclick=()=>$('#al').close();
+$('#op').onclick=()=>{if(!pin){$('#ePin').textContent='';$('#pin').value='';$('#dPin').showModal();$('#pin').focus()}};
+$('#bOut').onclick=()=>{pin=null;try{sessionStorage.removeItem('ds_pin')}catch{}renderAll()};
+$('#fPin').onsubmit=async e=>{e.preventDefault();const p=$('#pin').value.trim();
+ try{if(await api.check(p)){pin=p;try{sessionStorage.setItem('ds_pin',p)}catch{}$('#dPin').close();renderAll()}else $('#ePin').textContent='PIN salah.'}
+ catch{$('#ePin').textContent='Tidak bisa menghubungi server. Cek koneksi dan konfigurasi.'}};
+$('#fHari').innerHTML=DAYS.map(d=>`<option value="${d}">${HARI[d]}</option>`).join('');
+function openForm(s){editing=s?s.id:null;$('#tForm').textContent=s?'Edit shift':'Tambah shift';$('#eForm').textContent='';
+ $('#fHari').value=s?s.hari:selDay;$('#fNama').value=s?s.shift_nama:'';$('#fMulai').value=s?hm(s.jam_mulai):'';$('#fSelesai').value=s?hm(s.jam_selesai):'';$('#fPet').value=s?s.petugas:'';$('#fCat').value=s?s.catatan||'':'';
+ $('#dForm').showModal()}
+$('#bAdd').onclick=()=>openForm();
+$('#fForm').onsubmit=async e=>{e.preventDefault();
+ const r={id:editing,hari:+$('#fHari').value,shift_nama:$('#fNama').value.trim(),jam_mulai:$('#fMulai').value,jam_selesai:$('#fSelesai').value,petugas:$('#fPet').value.trim(),catatan:$('#fCat').value.trim()};
+ if(mins(r.jam_selesai)<=mins(r.jam_mulai)){$('#eForm').textContent='Jam selesai harus setelah jam mulai.';return}
+ try{await api.save(r);$('#dForm').close();selDay=r.hari;await refresh()}catch(x){$('#eForm').textContent=String(x.message||x).includes('PIN')?'PIN tidak valid. Keluar lalu login lagi.':'Gagal menyimpan: '+(x.message||x)}};
+$('#list').onclick=async e=>{const b=e.target.closest('[data-act]');if(!b)return;const s=shifts.find(x=>x.id===b.dataset.id);if(!s)return;
+ if(b.dataset.act==='edit')openForm(s);
+ else if(confirm('Hapus '+s.shift_nama+' hari '+HARI[s.hari]+'?')){try{await api.del(s.id);await refresh()}catch(x){alert('Gagal menghapus: '+(x.message||x))}}};
+$('#bSeed').onclick=async()=>{try{for(const a of SEED)await api.save({hari:a[0],shift_nama:a[1],jam_mulai:a[2],jam_selesai:a[3],petugas:a[4],catatan:a[5]});await refresh()}catch(x){alert('Gagal: '+(x.message||x))}};
+
+// tools
+$('#bNotif').onclick=async()=>{if(!('Notification' in window))return alert('Browser ini tidak mendukung notifikasi.');const p=await Notification.requestPermission();$('#bNotif').textContent=p==='granted'?'Notifikasi aktif':'Notifikasi ditolak'};
+if('Notification' in window&&Notification.permission==='granted')$('#bNotif').textContent='Notifikasi aktif';
+let wl=null;async function wake(){try{wl=await navigator.wakeLock.request('screen');$('#bWake').textContent='Layar menyala (aktif)';wl.onrelease=()=>{if(!wl)$('#bWake').textContent='Layar tetap menyala'}}catch{}}
+$('#bWake').onclick=()=>{if(!('wakeLock' in navigator))return alert('Browser ini tidak mendukung fitur ini.');if(wl){const w=wl;wl=null;w.release();$('#bWake').textContent='Layar tetap menyala'}else wake()};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(wl)wake();refresh()}});
+let ip=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;$('#bInstall').hidden=false});
+$('#bInstall').onclick=async()=>{if(ip){ip.prompt();await ip.userChoice;ip=null;$('#bInstall').hidden=true}};
+if(/iphone|ipad/i.test(navigator.userAgent)&&!navigator.standalone)$('#ios').hidden=false;
+if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+// start
+if(mode==='cloud')db.channel('jadwal').on('postgres_changes',{event:'*',schema:'public',table:'jadwal_danus'},()=>refresh()).subscribe();
+setInterval(tick,1000);setInterval(refresh,60000);
+renderAll();refresh();
+</script></body></html>
